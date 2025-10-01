@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Sonalip-22/spring-petclinic1.git', credentialsId: 'github-cred'
+                git branch: 'main', url: 'https://github.com/Sonalip-22/simple-mavenproject.git', credentialsId: 'github-cred'
                 echo "pulling sucessfully"
             }
         }
