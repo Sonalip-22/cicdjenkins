@@ -1,16 +1,12 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven-3.8.8'   // name you configured in Jenkins -> Global Tool Configuration
-        jdk 'Java-17'         // same, configure JDK in Jenkins
-    }
-
     stages {
-        stage('Checkout from GitHub') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Sonalip-22/simplemaven-project.git'
-                credentialsId: 'github-cred'
+                git branch: 'main',
+                    url: 'https://github.com/Sonalip-22/simplemaven-project.git',
+                    credentialsId: 'github-cred'
             }
         }
 
@@ -22,21 +18,22 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t your-dockerhub-username/your-app:latest .'
+                sh 'docker build -t sonalip22/cicdjenkins-app:latest .'
             }
         }
 
         stage('Push to DockerHub') {
             steps {
-                withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
-                    sh 'docker push your-dockerhub-username/your-app:latest'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh 'docker push sonalip22/cicdjenkins-app:latest'
                 }
             }
         }
 
         stage('Run Container') {
             steps {
-                sh 'docker run -d -p 8080:8080 your-dockerhub-username/your-app:latest'
+                sh 'docker run -d -p 8080:8080 sonalip22/cicdjenkins-app:latest'
             }
         }
     }
