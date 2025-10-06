@@ -9,8 +9,9 @@ pipeline {
     stages {
         stage('Checkout from GitHub') {
             steps {
-                git branch: 'main', url: 'https://github.com/Sonalip-22/simplemaven-project.git'
-                credentialsId: 'github-cred'
+                git branch: 'main', 
+                    url: 'https://github.com/Sonalip-22/simplemaven-project.git'
+                    credentialsId: 'github-cred'
             }
         }
 
