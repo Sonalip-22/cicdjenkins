@@ -1,16 +1,21 @@
 pipeline {
     agent any
 
+    environment {
+        // Set heartbeat interval to prevent false timeout on slow filesystems
+        JAVA_OPTS = "-Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=86400"
+    }
+
     tools {
-        maven 'Maven-3.8.8'
-        jdk 'Java-17'
+        maven 'Maven-3.8.8'   // Replace with your configured Maven
+        jdk 'Java-17'         // Replace with your configured JDK
     }
 
     stages {
         stage('Checkout from GitHub') {
             steps {
-                git branch: 'main', 
-                    url: 'https://github.com/Sonalip-22/simplemaven-project.git', 
+                git branch: 'main',
+                    url: 'https://github.com/Sonalip-22/simplemaven-project.git',
                     credentialsId: 'github-cred'
             }
         }
@@ -23,22 +28,35 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t your-dockerhub-username/your-app:latest .'
+                sh 'docker build -t my-image:latest .'
             }
         }
 
         stage('Push to DockerHub') {
             steps {
-                withDockerRegistry([credentialsId: 'dockerhub-creds', url: '']) {
-                    sh 'docker push your-dockerhub-username/your-app:latest'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+                    sh 'docker push my-image:latest'
                 }
             }
         }
 
         stage('Run Container') {
             steps {
-                sh 'docker run -d -p 8080:8080 your-dockerhub-username/your-app:latest'
+                sh 'docker run -d --name my-container my-image:latest'
             }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker ps -a'
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs for details.'
         }
     }
 }
