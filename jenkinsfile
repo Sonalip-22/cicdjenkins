@@ -25,6 +25,7 @@ pipeline {
         stage('Building') {
             steps {
                sh 'mvn clean package'
+               sh 'ls -l target/'
                echo "Build completed successfully!"
             }
         }
@@ -35,20 +36,20 @@ pipeline {
             }
         }
 
-        // stage('Push to DockerHub') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-        //             sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
-        //             sh 'docker push my-image:latest'
-        //         }
-        //     }
-        // }
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+                    sh 'docker push my-image:latest'
+                }
+            }
+        }
 
-        // stage('Run Container') {
-        //     steps {
-        //         sh 'docker run -d --name my-container my-image:latest'
-        //     }
-        // }
+        stage('Run Container') {
+            steps {
+                sh 'docker run -d --name my-container my-image:latest'
+            }
+        }
     }
 
     
