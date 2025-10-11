@@ -24,7 +24,7 @@ pipeline {
         
         stage('Building') {
             steps {
-               sh 'mvn clean package'
+               sh 'mvn clean package -B -V'
                sh 'ls -l target/'
                echo "Build completed successfully!"
             }
@@ -33,6 +33,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t my-image:latest .'
+                sh 'docker images'
+                echo "Docker image built successfully!"
             }
         }
 
